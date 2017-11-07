@@ -28,7 +28,10 @@
 	<script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
 	<![endif]-->
 
+	<!-- Before wp_head -->
 	<?php wp_head(); ?>
+
+	<!-- Before zilla_head -->
     <?php zilla_head(); ?>
     
 <!-- END head -->

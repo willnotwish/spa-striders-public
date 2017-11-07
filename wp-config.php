@@ -17,4 +17,15 @@ $table_prefix  = 'wp_';
 define('WP_DEBUG', false);
 if ( !defined('ABSPATH') )
 	define('ABSPATH', dirname(__FILE__) . '/');
+
+// Added by Nick Nov 2017
+
+// is_ssl() doesn't work as expected when behind a proxy or load balancer. It only looks at $_SERVER['HTTPS']
+// AWS load balancers set X-Forwarded-Proto
+
+$_SERVER['HTTPS'] = !empty($_SERVER['X-FORWARDED-PROTO']) ? $_SERVER['X-FORWARDED-PROTO'] : 0;
+
+// This might be needed. Leave commented out for now
+// $_SERVER['REMOTE_ADDR'] = $_SERVER['X-Forwarded-For'];
+
 require_once(ABSPATH . 'wp-settings.php');

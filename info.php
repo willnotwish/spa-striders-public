@@ -1,3 +1,2 @@
 <!-- info.php -->
 
-<?php phpinfo(); ?>

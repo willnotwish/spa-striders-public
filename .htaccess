@@ -3,6 +3,9 @@ AddType application/x-httpd-php56 .php .php5
 
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
+
+LogLevel mod_rewrite.c:trace8
+
 RewriteEngine On
 
 # This translates the header added by an upstream proxy (eg, a load balancer)

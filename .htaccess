@@ -10,8 +10,8 @@ RewriteEngine On
 
 # First, a condition; then, a rule.
 
-# 1. The condition. If the environment variable X-Forwarded-Proto has the value https
-RewriteCond %{ENV:X-Forwarded-Proto} https
+# 1. The condition. If the environment variable HTTP_X_FORWARDED_PROTO has the value https
+RewriteCond %{ENV:HTTP_X_FORWARDED_PROTO} https
 
 # 2. The rule. The syntax is:
 # RewriteRule Pattern Substitution [flags]

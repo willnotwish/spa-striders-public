@@ -35,6 +35,7 @@ class MetaSliderImageHelper {
             $this->id = get_post_thumbnail_id( $slide_id );
         }
 
+
         $this->url = apply_filters("metaslider_attachment_url", $upload_dir['baseurl'] . "/" . get_post_meta( $this->id, '_wp_attached_file', true ), $this->id);
         $this->path = get_attached_file( $this->id );
         $this->container_width = $width;
@@ -243,6 +244,9 @@ class MetaSliderImageHelper {
         }
 
         $dest_url = apply_filters( 'metaslider_resized_image_url', $dest_url, $this->url );
+
+        // Added by Nick. Serve the images using the same protocol (http or https) as the page the slider is on
+        $dest_url = set_url_scheme( $dest_url );
 
         return $dest_url;
     }

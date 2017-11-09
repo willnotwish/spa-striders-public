@@ -1,10 +1,7 @@
 AddType application/x-httpd-php56 .php .php5
 
-
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
-
-LogLevel mod_rewrite.c:trace8
 
 RewriteEngine On
 
@@ -13,14 +10,13 @@ RewriteEngine On
 
 # First, a condition; then, a rule.
 
-# 1. The condition. If the environment variable HTTP_X_FORWARDED_PROTO has the value https
-RewriteCond %{ENV:HTTP_X_FORWARDED_PROTO} https
-
+# 1. The condition. If the header X-Forwarded-Proto has the value https
 # 2. The rule. The syntax is:
 # RewriteRule Pattern Substitution [flags]
 # Pattern .* means "match everything"
 # Substitution: - means "no change"
 # [E=VAR:VAL] add the variable ENV with the value VAL
+RewriteCond %{HTTP:X-Forwarded-Proto} https
 RewriteRule .* - [E=HTTPS:on]
 
 RewriteRule ^index\.php$ - [L]

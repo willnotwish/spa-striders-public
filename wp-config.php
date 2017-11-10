@@ -15,6 +15,17 @@ define('LOGGED_IN_SALT',   $_SERVER['LOGGED_IN_SALT']);
 define('NONCE_SALT',       $_SERVER['NONCE_SALT']);
 $table_prefix  = 'wp_';
 define('WP_DEBUG', false);
+
+
+// S3 related - for storing uploads
+
+define( 'S3_UPLOADS_BUCKET', 'striders-uploads' );
+define( 'S3_UPLOADS_KEY', 'AKIAI7UKXNGER2SIMOBQ' );
+define( 'S3_UPLOADS_SECRET', '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' );
+define( 'S3_UPLOADS_REGION', 'eu-west-1' ); // the s3 bucket region, required for Frankfurt, Beijing & Sydney.
+
+
+
 if ( !defined('ABSPATH') )
 	define('ABSPATH', dirname(__FILE__) . '/');
 

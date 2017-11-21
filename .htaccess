@@ -19,7 +19,18 @@ RewriteEngine On
 RewriteCond %{HTTP:X-Forwarded-Proto} https
 RewriteRule .* - [E=HTTPS:on]
 
+# Next, unless the protocol is already https, redirect to the https version.
+# This will catch anyone trying to access via http
+# If we are behind a proxy, then HTTPS will be set (as above)
+# If not, then HTTPS will be set directly anyway
+RewriteCond %{HTTP:HTTPS} !on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 RewriteRule ^index\.php$ - [L]
+
+RewriteRule ^members https://members.spastriders.co.uk [L,R=301]
+RewriteRule ^register https://members.spastriders.co.uk/users/register [L,R=301]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]

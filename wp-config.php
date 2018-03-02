@@ -28,3 +28,7 @@ if ( !defined('ABSPATH') )
 
 
 require_once(ABSPATH . 'wp-settings.php');
+
+
+// We don't want auto update. Don't turn this on without good reason.
+define( 'WP_AUTO_UPDATE_CORE', false );

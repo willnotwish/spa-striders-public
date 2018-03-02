@@ -7,3 +7,5 @@ log/*
 
 # Important. Don't store the uploads in git. That way they won't get deployed to EB
 wp-content/uploads/*
+
+db/*

@@ -21,10 +21,32 @@ Shout out to http://www.makeuseof.com/tag/how-to-create-wordpress-widgets/ for t
 class listTestimonialsWidget extends WP_Widget
 {
 	var $config;
+	var $defaults; 
 	
 	function __construct(){
 		//load config
 		$this->config = new easyTestimonialsConfig();
+		
+		//load defaults
+		$this->defaults = array(
+			'title' => '',
+			'count' => 5,
+			'show_title' => 0,
+			'category' => '',
+			'use_excerpt' => 0,
+			'show_rating' => 'stars',
+			'show_date' => true,
+			'width' => false,
+			'show_testimonial_image' => get_option('testimonials_image', true),
+			'order' => 'ASC',
+			'order_by' => 'date',
+			'show_other' => true,
+			'theme' => get_option('testimonials_style', 'default_style'),
+			'paginate' => 'all',
+			'testimonials_per_page' => '',
+			'hide_view_more' => 1,
+			'output_schema_markup' => get_option('easy_t_output_schema_markup', true)
+		);
 	
 		$widget_ops = array('classname' => 'listTestimonialsWidget', 'description' => 'Displays a List of Testimonials.' );
 		parent::__construct('listTestimonialsWidget', 'Easy Testimonials List', $widget_ops);
@@ -36,25 +58,7 @@ class listTestimonialsWidget extends WP_Widget
 	}
 
 	function form($instance){
-		$defaults = array(
-			'title' => '',
-			'count' => 5,
-			'show_title' => 0,
-			'category' => '',
-			'use_excerpt' => 0,
-			'show_rating' => false,
-			'show_date' => false,
-			'width' => false,
-			'show_testimonial_image' => 0,
-			'order' => 'ASC',
-			'order_by' => 'date',
-			'show_other' => 0,
-			'theme' => get_option('testimonials_style', 'default_style'),
-			'paginate' => false,
-			'testimonials_per_page' => 10,
-			'hide_view_more' => 1
-		);
-		$instance = wp_parse_args( (array) $instance, $defaults );
+		$instance = wp_parse_args( (array) $instance, $this->defaults );
 		$title = $instance['title'];
 		$count = $instance['count'];
 		$show_title = $instance['show_title'];
@@ -71,11 +75,12 @@ class listTestimonialsWidget extends WP_Widget
 		$paginate = $instance['paginate'];
 		$hide_view_more = $instance['hide_view_more'];
 		$testimonials_per_page = $instance['testimonials_per_page'];
-		$testimonial_categories = get_terms( 'easy-testimonial-category', 'orderby=title&hide_empty=0' );				
+		$testimonial_categories = get_terms( 'easy-testimonial-category', 'orderby=title&hide_empty=0' );
+		$output_schema_markup = $instance['output_schema_markup'];
 		$ip = $this->config->is_pro;
-	
-		$free_theme_array = $this->config->free_theme_array;
-		$pro_theme_array = $this->config->pro_theme_array;
+		
+		//load themes
+		$themes = $this->config->load_theme_array();
 		?>
 		<div class="gp_widget_form_wrapper">
 			<p class="hide_in_popup">
@@ -86,31 +91,18 @@ class listTestimonialsWidget extends WP_Widget
 			<p>
 				<label for="<?php echo $this->get_field_id('theme'); ?>">Theme:</label><br/>
 				<select name="<?php echo $this->get_field_name('theme'); ?>" id="<?php echo $this->get_field_id('theme'); ?>">	
-					<optgroup label="Free Themes">
-					<?php foreach($free_theme_array as $key => $theme_name): ?>
-						<option value="<?php echo $key ?>" <?php if($theme == $key): echo 'selected="SELECTED"'; endif; ?>><?php echo htmlentities($theme_name); ?></option>					
-					<?php endforeach; ?>
-					</optgroup>
-					<?php foreach($pro_theme_array as $group_key => $theme_group): ?>
-						<?php $group_label = $this->get_theme_group_label($theme_group); ?>
-							<?php if (!$ip): ?>
-							<optgroup  disabled="disabled" label="<?php echo htmlentities($group_label);?> (Pro)">
-							<?php else: ?>
-							<optgroup  label="<?php echo htmlentities($group_label);?>">
-							<?php endif; ?>
+					<?php foreach($themes as $group_key => $theme_group): ?>
+					<?php $group_label = $this->get_theme_group_label($theme_group); ?>									
+						<optgroup  label="<?php echo htmlentities($group_label);?>">
 							<?php foreach($theme_group as $key => $theme_name): ?>
-								<?php if (!$ip): ?>
-								<option disabled="disabled" value="<?php echo $key ?>" <?php if($theme == $key): echo 'selected="SELECTED"'; endif; ?>><?php echo htmlentities($theme_name); ?></option>
-								<?php else: ?>
 								<option value="<?php echo $key ?>" <?php if($theme == $key): echo 'selected="SELECTED"'; endif; ?>><?php echo htmlentities($theme_name); ?></option>
-								<?php endif; ?>
 							<?php endforeach; ?>
 						</optgroup>
 					<?php endforeach; ?>
 				</select>
 				<?php if (!$ip): ?>
 				<br />
-				<em><a target="_blank" href="http://goldplugins.com/our-plugins/easy-testimonials-details/upgrade-to-easy-testimonials-pro/?utm_source=wp_widgets&utm_campaign=widget_themes">Upgrade To Unlock All 75+ Pro Themes!</a></em>
+				<em><a target="_blank" href="http://goldplugins.com/our-plugins/easy-testimonials-details/upgrade-to-easy-testimonials-pro/?utm_source=wp_widgets&utm_campaign=widget_themes">Upgrade To Unlock All 100+ Pro Themes!</a></em>
 				<?php endif; ?>
 			</p>
 			
@@ -190,34 +182,47 @@ class listTestimonialsWidget extends WP_Widget
 				<legend>Fields To Display:</legend> &nbsp;
 				<div class="bikeshed_radio">
 					<p>
-						<input class="widefat" id="<?php echo $this->get_field_id('show_title'); ?>" name="<?php echo $this->get_field_name('show_title'); ?>" type="checkbox" value="1" <?php if($show_title){ ?>checked="CHECKED"<?php } ?>/>
+						<input name="<?php echo $this->get_field_name('show_title'); ?>" type="hidden" value="0" />
+						<input class="widefat" id="<?php echo $this->get_field_id('show_title'); ?>" name="<?php echo $this->get_field_name('show_title'); ?>" type="checkbox" value="1" <?php if($show_title){ ?>checked="CHECKED"<?php } ?> data-shortcode-value-if-unchecked="0" />
 						<label for="<?php echo $this->get_field_id('show_title'); ?>">Show Testimonial Title</label>
 					</p>
 					
 					<p>
-						<input class="widefat" id="<?php echo $this->get_field_id('use_excerpt'); ?>" name="<?php echo $this->get_field_name('use_excerpt'); ?>" type="checkbox" value="1" <?php if($use_excerpt){ ?>checked="CHECKED"<?php } ?>/>
+						<input name="<?php echo $this->get_field_name('use_excerpt'); ?>" type="hidden" value="0" />
+						<input class="widefat" id="<?php echo $this->get_field_id('use_excerpt'); ?>" name="<?php echo $this->get_field_name('use_excerpt'); ?>" type="checkbox" value="1" <?php if($use_excerpt){ ?>checked="CHECKED"<?php } ?> data-shortcode-value-if-unchecked="0" />
 						<label for="<?php echo $this->get_field_id('use_excerpt'); ?>">Use Testimonial Excerpt</label>
 					</p>	
 					
 					<p>
-						<input class="widefat" id="<?php echo $this->get_field_id('show_testimonial_image'); ?>" name="<?php echo $this->get_field_name('show_testimonial_image'); ?>" type="checkbox" value="1" <?php if($show_testimonial_image){ ?>checked="CHECKED"<?php } ?> data-shortcode-key="show_thumbs" />
+						<input name="<?php echo $this->get_field_name('show_testimonial_image'); ?>" type="hidden" value="0" />
+						<input class="widefat" id="<?php echo $this->get_field_id('show_testimonial_image'); ?>" name="<?php echo $this->get_field_name('show_testimonial_image'); ?>" type="checkbox" value="1" <?php if($show_testimonial_image){ ?>checked="CHECKED"<?php } ?> data-shortcode-key="show_thumbs" data-shortcode-value-if-unchecked="0"/>
 						<label for="<?php echo $this->get_field_id('show_testimonial_image'); ?>">Show Featured Image</label>
 					</p>
 					
 					<p>
-						<input class="widefat" id="<?php echo $this->get_field_id('show_date'); ?>" name="<?php echo $this->get_field_name('show_date'); ?>" type="checkbox" value="1" <?php if($show_date){ ?>checked="CHECKED"<?php } ?>/>
+						<input name="<?php echo $this->get_field_name('show_date'); ?>" type="hidden" value="0" />
+						<input class="widefat" id="<?php echo $this->get_field_id('show_date'); ?>" name="<?php echo $this->get_field_name('show_date'); ?>" type="checkbox" value="1" <?php if($show_date){ ?>checked="CHECKED"<?php } ?> data-shortcode-value-if-unchecked="0"/>
 						<label for="<?php echo $this->get_field_id('show_date'); ?>">Show Testimonial Date</label>
 					</p>
 					
 					<p>
-						<input class="widefat" id="<?php echo $this->get_field_id('show_other'); ?>" name="<?php echo $this->get_field_name('show_other'); ?>" type="checkbox" value="1" <?php if($show_other){ ?>checked="CHECKED"<?php } ?>/>
+						<input name="<?php echo $this->get_field_name('show_other'); ?>" type="hidden" value="0" />
+						<input class="widefat" id="<?php echo $this->get_field_id('show_other'); ?>" name="<?php echo $this->get_field_name('show_other'); ?>" type="checkbox" value="1" <?php if($show_other){ ?>checked="CHECKED"<?php } ?> data-shortcode-value-if-unchecked="0" />
 						<label for="<?php echo $this->get_field_id('show_other'); ?>">Show "Location Reviewed / Product Reviewed / Item Reviewed" Field</label>
 					</p>
 					
 					<p>
+						<input name="<?php echo $this->get_field_name('hide_view_more'); ?>" type="hidden" value="0" />
 						<input class="widefat" id="<?php echo $this->get_field_id('hide_view_more'); ?>" name="<?php echo $this->get_field_name('hide_view_more'); ?>" type="checkbox" value="1" <?php if($hide_view_more){ ?>checked=""<?php } ?> data-shortcode-value-if-unchecked="0" />
 						<label for="<?php echo $this->get_field_id('hide_view_more'); ?>">Hide View More Testimonials Link</label>
 					</p>
+					
+					<p>
+						<input type="hidden" value="0" name="<?php echo $this->get_field_name('output_schema_markup'); ?>" />
+						<input class="widefat" id="<?php echo $this->get_field_id('output_schema_markup'); ?>" name="<?php echo $this->get_field_name('output_schema_markup'); ?>" type="checkbox" value="1" <?php if($output_schema_markup){ ?>checked=""<?php } ?> data-shortcode-value-if-unchecked="0" />
+						<label for="<?php echo $this->get_field_id('output_schema_markup'); ?>">Output Review Markup</label>
+					</p>
+					<p class="description">Output the JSON-LD schema.org compliant review markup with each Testimonial.</p>
 				</div>
 			</fieldset>
 
@@ -240,6 +245,8 @@ class listTestimonialsWidget extends WP_Widget
 	}
 
 	function update($new_instance, $old_instance){
+		$new_instance = wp_parse_args( (array) $new_instance, $this->defaults );
+		
 		$instance = $old_instance;
 		$instance['title'] = $new_instance['title'];
 		$instance['count'] = $new_instance['count'];
@@ -257,6 +264,7 @@ class listTestimonialsWidget extends WP_Widget
 		$instance['theme'] = $new_instance['theme'];
 		$instance['paginate'] = $new_instance['paginate'];
 		$instance['testimonials_per_page'] = $new_instance['testimonials_per_page'];
+		$instance['output_schema_markup'] = $new_instance['output_schema_markup'];
 		
 		return $instance;
 	}
@@ -286,6 +294,7 @@ class listTestimonialsWidget extends WP_Widget
 		$testimonials_link = empty($instance['testimonials_link']) ? get_option('testimonials_link') : $instance['testimonials_link'];
 		$paginate =  empty($instance['paginate']) ? false : $instance['paginate'];
 		$testimonials_per_page =  empty($instance['testimonials_per_page']) ? 10 : $instance['testimonials_per_page'];
+		$output_schema_markup = empty($instance['output_schema_markup']) ? 0 : $instance['output_schema_markup'];
 
 		if (!empty($title)){
 			echo $before_title . $title . $after_title;;
@@ -312,7 +321,8 @@ class listTestimonialsWidget extends WP_Widget
 			'theme' => $theme,
 			'paginate' => $paginate,
 			'testimonials_per_page' => $testimonials_per_page,
-			'hide_view_more' => $hide_view_more
+			'hide_view_more' => $hide_view_more,
+			'output_schema_markup' => $output_schema_markup
 		);
 		
 		echo $easy_testimonials->outputTestimonials( $args );

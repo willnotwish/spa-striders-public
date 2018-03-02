@@ -23,6 +23,7 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 		register_setting( 'easy-testimonials-display-settings-group', 'testimonials_image' );
 		register_setting( 'easy-testimonials-display-settings-group', 'meta_data_position' );
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_mystery_man' );
+		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_fallback_image_method' );
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_gravatar' );
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_image_size' );
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_width' );
@@ -31,58 +32,14 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_excerpt_length', array($this, 'easy_t_excerpt_length') );
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_link_excerpt_to_full' );
 		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_use_custom_excerpt' );
-		
-		/* Typography options */
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_body_font_size' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_body_font_color' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_body_font_style' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_body_font_family' );
-
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_author_font_size' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_author_font_color' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_author_font_style' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_author_font_family' );
-
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_position_font_size' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_position_font_color' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_position_font_style' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_position_font_family' );
-
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_date_font_size' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_date_font_color' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_date_font_style' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_date_font_family' );
-
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_other_font_size' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_other_font_color' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_other_font_style' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_other_font_family' );
-
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_rating_font_size' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_rating_font_color' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_rating_font_style' );
-		register_setting( 'easy-testimonials-display-settings-group', 'easy_t_rating_font_family' );
 	}
 	
-	function render_settings_page(){	
-		//add upgrade button if free version
-		$extra_buttons = array();
-		if(!$this->config->is_pro){
-			$extra_buttons = array(
-				array(
-					'class' => 'btn-purple',
-					'label' => 'Upgrade To Pro',
-					'url' => 'https://goldplugins.com/our-plugins/easy-testimonials-details/upgrade-to-easy-testimonials-pro/'
-				)
-			);
-		}
-		
+	function render_settings_page()
+	{
 		//instantiate tabs object for output basic settings page tabs
 		$tabs = new GP_Sajak( array(
 			'header_label' => 'Display Settings',
 			'settings_field_key' => 'easy-testimonials-display-settings-group', // can be an array			
-			'extra_buttons_header' => $extra_buttons, // extra header buttons
-			'extra_buttons_footer' => $extra_buttons // extra footer buttons
 		) );		
 		
 		$this->settings_page_top();
@@ -90,24 +47,12 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 		$this->settings_page_bottom();
 	}
 
-	function output_font_options(){
-		?>
-		<h3>Font Styles</h3>
-		<?php if(!$this->config->is_pro):?>
-		<p class="easy_testimonials_not_registered"><strong>These features require Easy Testimonials Pro.</strong>&nbsp;&nbsp;&nbsp;<a class="button" target="blank" href="https://goldplugins.com/our-plugins/easy-testimonials-details/upgrade-to-easy-testimonials-pro/?utm_source=easy_testimonials_settings&utm_campaign=upgrade&utm_banner=display_options">Upgrade Now To Enable</a></p>
-		<?php endif;?>
-		<table class="form-table">
-			<?php $this->typography_input('easy_t_body_*', 'Testimonial Body', 'Font style of the body.'); ?>
-			<?php $this->typography_input('easy_t_author_*', 'Author\'s Name', 'Font style of the author\'s name.'); ?>
-			<?php $this->typography_input('easy_t_position_*', 'Author\'s Position / Job Title', 'Font style of the author\'s Position (Job Title).'); ?>
-			<?php $this->typography_input('easy_t_date_*', 'Date', 'Font style of the testimonial date.'); ?>
-			<?php $this->typography_input('easy_t_other_*', 'Location / Item Reviewed', 'Font style of the Location / Item reviewed.'); ?>
-			<?php $this->typography_input('easy_t_rating_*', 'Rating', 'Font style of the rating (NOTE: only Color is used when displaying ratings as Stars).'); ?>
-		</table>
-		<?php
-	}
-
 	function output_image_options(){
+		//fix for legacy users
+		if (get_option('easy_t_mystery_man', 1)){
+			update_option('easy_t_fallback_image_method', 'mystery_person');
+			update_option('easy_t_mystery_man', 0);			
+		}	
 		?>
 		<h3>Testimonial Images</h3>
 		<table class="form-table">
@@ -118,7 +63,7 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 				</td>
 			</tr>
 			<tr valign="top">
-				<th scope="row"><label for="easy_t_image_size">Testimonial Image Size</a></th>
+				<th scope="row"><label for="easy_t_image_size">Testimonial Image Size</label></th>
 				<td>
 					<select name="easy_t_image_size" id="easy_t_image_size">	
 						<?php $this->easy_t_output_image_options(); ?>
@@ -128,14 +73,26 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 			</tr>
 			<tr valign="top">
 				<td><input type="checkbox" name="easy_t_gravatar" id="easy_t_gravatar" value="1" <?php if(get_option('easy_t_gravatar', true)){ ?> checked="CHECKED" <?php } ?>/>
-				<label for="easy_t_gravatar">Use Gravatar</label>
-				<p class="description">If checked, and you are displaying Testimonial Images, we will use a Gravatar if one is found matching the E-Mail Address on the Testimonial.</p>
+				<label for="easy_t_gravatar">Use Gravatars</label>
+				<p class="description">Use a Gravatar if one is found matching the E-Mail Address on the Testimonial.</p>
 				</td>
 			</tr>
-			<tr valign="top">
-				<td><input type="checkbox" name="easy_t_mystery_man" id="easy_t_mystery_man" value="1" <?php if(get_option('easy_t_mystery_man', true)){ ?> checked="CHECKED" <?php } ?>/>
-				<label for="easy_t_mystery_man">Use Mystery Man</label>
-				<p class="description">If checked, and you are displaying Testimonial Images, the Mystery Man avatar will be used for any missing images.</p>
+			<tr valign="top">			
+				<th scope="row">
+				<label for="easy_t_gravatar">Fallback Images</label><br>
+				<p class="description" style="font-weight:normal">If no Featured Image is set and no Gravatar is found, a fallback image can be used.</p>
+				</th>
+				<td>
+				<input type="radio" name="easy_t_fallback_image_method" id="easy_t_fallback_image_method_mystery_person" value="mystery_person" <?php if(get_option('easy_t_fallback_image_method', '') == "mystery_person" ){ ?> checked="CHECKED" <?php } ?>/>
+				<label for="easy_t_fallback_image_method_mystery_person">Mystery Person</label>
+				<p class="description">Use the Mystery Person avatar for any missing images.</p>
+				<br>
+				<input type="radio" name="easy_t_fallback_image_method" id="easy_t_fallback_image_method_smart_text_avatars" value="smart_text_avatars" <?php if(get_option('easy_t_fallback_image_method', '') == "smart_text_avatars" ){ ?> checked="CHECKED" <?php } ?>/>
+				<label for="easy_t_fallback_image_method_smart_text_avatars">Smart Text Avatars</label>
+				<p class="description">Use the Client's initials overlayed on top of bold colors as an avatar for any missing images.</p>
+				<br>
+				<input type="radio" name="easy_t_fallback_image_method" id="easy_t_fallback_image_method_no_image" value="no_image" <?php if(get_option('easy_t_fallback_image_method', '') == "no_image" ){ ?> checked="CHECKED" <?php } ?>/>
+				<label for="easy_t_fallback_image_method_no_image">No Fallback Image</label>
 				</td>
 			</tr>
 		</table>
@@ -200,13 +157,13 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><label for="easy_t_previous_text">Previous Testimonial Text</label></th>
-				<td><input type="text" name="easy_t_previous_text" id="easy_t_previous_text" value="<?php echo get_option('easy_t_previous_text', '<< Prev'); ?>" />
+				<td><input type="text" name="easy_t_previous_text" id="easy_t_previous_text" value="<?php echo htmlentities( get_option('easy_t_previous_text', '<< Prev') ); ?>" />
 				<p class="description">This is the Text used for the Previous Testimonial button in the slideshow.</p>
 				</td>
 			</tr>
 			<tr valign="top">
 				<th scope="row"><label for="easy_t_next_text">Next Testimonial Text</label></th>
-				<td><input type="text" name="easy_t_next_text" id="easy_t_next_text" value="<?php echo get_option('easy_t_next_text', 'Next >>'); ?>" />
+				<td><input type="text" name="easy_t_next_text" id="easy_t_next_text" value="<?php echo htmlentities( get_option('easy_t_next_text', 'Next >>') ); ?>" />
 				<p class="description">This is the Text used for the Next Testimonial button in the slideshow.</p>
 				</td>
 			</tr>
@@ -255,15 +212,6 @@ class easyTestimonialDisplayOptions extends easyTestimonialOptions{
 			array(
 				'class' => 'extra_li_class', // extra classes to add sidebar menu <li> and tab wrapper <div>
 				'icon' => 'ellipsis-h' // icons here: http://fontawesome.io/icons/
-			)
-		);
-		$this->tabs->add_tab(
-			'font_options', // section id, used in url fragment
-			'Font Options' . $pro_string, // section label
-			array($this, 'output_font_options'), // display callback
-			array(
-				'class' => 'extra_li_class', // extra classes to add sidebar menu <li> and tab wrapper <div>
-				'icon' => 'font' // icons here: http://fontawesome.io/icons/
 			)
 		);
 		$this->tabs->add_tab(

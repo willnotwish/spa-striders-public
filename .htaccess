@@ -14,7 +14,7 @@ RewriteRule .* - [E=HTTPS:on]
 # Next, unless the protocol is already https, redirect to the https version.
 # This will catch anyone trying to access via http
 
-# I don't think it's possible to check the environment variable we may have set above, because it's not been set yet. 
+# I don't think it's possible to check the environment variable we may have set above, because it's not been set yet.
 # Instead, check the header again
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -33,8 +33,8 @@ RewriteRule ^login https://members.spastriders.co.uk/users/login [L,R=301]
 
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
-
 RewriteEngine On
+RewriteBase /
 RewriteRule ^index\.php$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

@@ -1,0 +1,8 @@
+.git
+.env
+.rbenv-vars
+.dockerignore
+.capistrano
+.ebextensions
+.elasticbeanstalk
+.docker

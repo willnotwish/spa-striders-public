@@ -20,10 +20,11 @@ $table_prefix  = 'wp_';
 define('WP_DEBUG', $_ENV["PUBLIC_WP_DEBUG"]);
 
 // S3 related - for storing uploads
-define('S3_UPLOADS_BUCKET', $_ENV['PUBLIC_WP_S3_UPLOADS_BUCKET']);
-define('S3_UPLOADS_KEY',    $_ENV['PUBLIC_WP_S3_UPLOADS_KEY']);
-define('S3_UPLOADS_SECRET', $_ENV['PUBLIC_WP_S3_UPLOADS_SECRET']);
-define('S3_UPLOADS_REGION', $_ENV['PUBLIC_WP_S3_UPLOADS_REGION']); // the s3 bucket region, required for Frankfurt, Beijing & Sydney.
+define('S3_UPLOADS_BUCKET',     $_ENV['PUBLIC_WP_S3_UPLOADS_BUCKET']);
+define('S3_UPLOADS_KEY',        $_ENV['PUBLIC_WP_S3_UPLOADS_KEY']);
+define('S3_UPLOADS_SECRET',     $_ENV['PUBLIC_WP_S3_UPLOADS_SECRET']);
+define('S3_UPLOADS_REGION',     $_ENV['PUBLIC_WP_S3_UPLOADS_REGION']);
+define('S3_UPLOADS_BUCKET_URL', $_ENV['PUBLIC_WP_S3_UPLOADS_BUCKET_URL']);
 
 if ( !defined('ABSPATH') )
 	define('ABSPATH', dirname(__FILE__) . '/');

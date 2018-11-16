@@ -1,0 +1,6 @@
+FROM nginx:alpine
+
+COPY default-vh.conf /etc/nginx/conf.d/default.conf
+
+WORKDIR /var/www/html
+COPY app/ .

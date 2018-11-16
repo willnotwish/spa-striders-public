@@ -6,3 +6,7 @@
 .ebextensions
 .elasticbeanstalk
 .docker
+
+wp-content/debug.log
+Dockerfile
+Dockerfile.*
